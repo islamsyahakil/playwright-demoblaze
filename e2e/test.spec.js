@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { generateRandomPassword, generateRandomUsername } from '../helpers/helpers';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 test('Sign-Up and Login for the First time', async ({ page }) => {
 
@@ -7,7 +10,7 @@ test('Sign-Up and Login for the First time', async ({ page }) => {
     const password = generateRandomPassword();
 
     await test.step('Open homepage', async () => {
-        await page.goto('https://demoblaze.com/');
+        await page.goto(process.env.BASE_URL);
     });
 
     await test.step('Sign up new user', async () => {
