@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "bdd": "cucumber-js -r features/support/world.cjs -r features/support/hooks.cjs -r features/steps/**/*.js features"
+  "bdd": "cucumber-js -r features/support/world.cjs -r features/support/hooks.cjs -r features/steps/**/*.js -f progress -f junit:results/cucumber.xml features"
   },
   "keywords": [],
   "author": "",

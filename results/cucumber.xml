@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<testsuite name="Cucumber" time="8.068" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-09-06T17:43:20.868Z">
+  <testcase classname="Sign-Up and Login" name="Sign-Up and Login for the First time" time="7.448">
+    <system-out><![CDATA[Given I open the homepage...................................................passed
+When I sign up a new user...................................................passed
+And I log in with that user.................................................passed
+Then I should see the welcome message with that username....................passed]]></system-out>
+  </testcase>
+</testsuite>

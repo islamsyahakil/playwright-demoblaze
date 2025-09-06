@@ -1,64 +1,60 @@
 name: CI – Cucumber + Playwright
-
-on:
-  push:
-  pull_request:
+on: [push, pull_request]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: 'npm'
 
-      - name: Install deps
+      - name: Install deps & browsers
         run: |
           npm ci
           npx playwright install --with-deps
 
-      # (Opsional) kalau kamu belum punya world/hooks:
-      # - name: Ensure support world/hooks
-      #   run: |
-      #     mkdir -p features/support
-      #     if [ ! -f features/support/world.js ]; then
-      #       cat > features/support/world.js <<'EOF'
-      #       const { setWorldConstructor } = require('@cucumber/cucumber');
-      #       class CustomWorld { constructor(){ this.browser=null; this.context=null; this.page=null; } }
-      #       setWorldConstructor(CustomWorld);
-      #       EOF
-      #     fi
-      #     if [ ! -f features/support/hooks.js ]; then
-      #       cat > features/support/hooks.js <<'EOF'
-      #       const { BeforeAll, AfterAll, Before, After, setDefaultTimeout } = require('@cucumber/cucumber');
-      #       const { chromium } = require('playwright');
-      #       setDefaultTimeout(60 * 1000);
-      #       let browser;
-      #       BeforeAll(async () => { browser = await chromium.launch({ headless: true }); });
-      #       AfterAll(async () => { if (browser) await browser.close(); });
-      #       Before(async function(){ this.context = await browser.newContext(); this.page = await this.context.newPage(); });
-      #       After(async function(){ if (this.context) await this.context.close(); });
-      #       EOF
-      #     fi
+      - name: Sanity: paths & versions
+        run: |
+          node -v
+          npm -v
+          npx cucumber-js --version
+          echo "== tree =="
+          ls -la
+          echo "== support =="
+          ls -la features/support || true
+          echo "== steps =="
+          ls -la features/steps || true
 
-      - name: Run Cucumber
+      - name: Run Cucumber (write JUnit)
         run: |
           mkdir -p results
-          npx cucumber-js \
-            -r features/support \
-            -r features/steps \
-            -f progress \
-            -f junit:results/cucumber.xml
+          set -o pipefail
+          npm run bdd | tee cucumber.log
+        # kalau kamu ingin build tetap merah saat gagal, biarkan seperti ini (tanpa || true)
 
-      - name: Upload JUnit to summary
+      - name: Ensure results exists (placeholder if crashed)
+        if: always()
+        run: |
+          if [ ! -f results/cucumber.xml ]; then
+            echo "Cucumber didn’t produce JUnit, creating placeholder for visibility"
+            cat > results/cucumber.xml <<'XML'
+            <testsuite name="cucumber" tests="1" failures="1">
+              <testcase classname="ci" name="Cucumber failed to start">
+                <failure>Check 'Run Cucumber' step logs in Actions</failure>
+              </testcase>
+            </testsuite>
+XML
+          fi
+
+      - name: Upload logs & JUnit
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: junit-results
-          path: results/*.xml
+          name: cucumber-artifacts
+          path: |
+            cucumber.log
+            results/*.xml
