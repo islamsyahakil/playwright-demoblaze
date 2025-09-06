@@ -4,6 +4,8 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    container: node:20   # ⬅️ pakai image resmi Node 20
+
     steps:
       - uses: actions/checkout@v4
 
