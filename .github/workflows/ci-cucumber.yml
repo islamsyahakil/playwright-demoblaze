@@ -1,0 +1,64 @@
+name: CI – Cucumber + Playwright
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install deps
+        run: |
+          npm ci
+          npx playwright install --with-deps
+
+      # (Opsional) kalau kamu belum punya world/hooks:
+      # - name: Ensure support world/hooks
+      #   run: |
+      #     mkdir -p features/support
+      #     if [ ! -f features/support/world.js ]; then
+      #       cat > features/support/world.js <<'EOF'
+      #       const { setWorldConstructor } = require('@cucumber/cucumber');
+      #       class CustomWorld { constructor(){ this.browser=null; this.context=null; this.page=null; } }
+      #       setWorldConstructor(CustomWorld);
+      #       EOF
+      #     fi
+      #     if [ ! -f features/support/hooks.js ]; then
+      #       cat > features/support/hooks.js <<'EOF'
+      #       const { BeforeAll, AfterAll, Before, After, setDefaultTimeout } = require('@cucumber/cucumber');
+      #       const { chromium } = require('playwright');
+      #       setDefaultTimeout(60 * 1000);
+      #       let browser;
+      #       BeforeAll(async () => { browser = await chromium.launch({ headless: true }); });
+      #       AfterAll(async () => { if (browser) await browser.close(); });
+      #       Before(async function(){ this.context = await browser.newContext(); this.page = await this.context.newPage(); });
+      #       After(async function(){ if (this.context) await this.context.close(); });
+      #       EOF
+      #     fi
+
+      - name: Run Cucumber
+        run: |
+          mkdir -p results
+          npx cucumber-js \
+            -r features/support \
+            -r features/steps \
+            -f progress \
+            -f junit:results/cucumber.xml
+
+      - name: Upload JUnit to summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-results
+          path: results/*.xml

@@ -7,11 +7,15 @@ Given('I open the homepage', async function () {
 });
 
 When('I sign up a new user', async function () {
-  const { page, username, password } = this;
+  const page = this.page;
+
+  // simpan user di World
+  this.username = `user_${Date.now()}`;
+  this.password = `P@ssw0rd123`;
 
   await page.getByRole('link', { name: 'Sign up' }).click();
-  await page.getByRole('textbox', { name: 'Username:' }).fill(username);
-  await page.getByRole('textbox', { name: 'Password:' }).fill(password);
+  await page.getByRole('textbox', { name: 'Username:' }).fill(this.username);
+  await page.getByRole('textbox', { name: 'Password:' }).fill(this.password);
 
   const dialogPromise = page.waitForEvent('dialog');
   await page.getByRole('button', { name: 'Sign up' }).click();
