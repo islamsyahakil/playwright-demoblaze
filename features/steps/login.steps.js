@@ -1,38 +1,42 @@
-const { Given, When, Then } = require('@cucumber/cucumber');
+// features/steps/login.steps.js
+const { createBdd } = require('playwright-bdd');
 const { expect } = require('@playwright/test');
 require('dotenv').config();
 
-Given('I open the homepage', async function () {
-  await this.page.goto(process.env.BASE_URL || 'https://demoblaze.com/');
+const { Given, When, Then } = createBdd();
+
+// simpan state per-skenario (aman untuk parallel)
+const state = new WeakMap();
+
+Given('I open the homepage', async ({ page }) => {
+  await page.goto(process.env.BASE_URL || 'https://demoblaze.com/');
+  state.set(page, {});
 });
 
-When('I sign up a new user', async function () {
-  const page = this.page;
-
-  // simpan user di World
-  this.username = `user_${Date.now()}`;
-  this.password = `P@ssw0rd123`;
+When('I sign up a new user', async ({ page }) => {
+  const s = state.get(page) || {};
+  s.username = `user_${Date.now()}`;
+  s.password = 'P@ssw0rd123';
+  state.set(page, s);
 
   await page.getByRole('link', { name: 'Sign up' }).click();
-  await page.getByRole('textbox', { name: 'Username:' }).fill(this.username);
-  await page.getByRole('textbox', { name: 'Password:' }).fill(this.password);
+  await page.getByRole('textbox', { name: 'Username:' }).fill(s.username);
+  await page.getByRole('textbox', { name: 'Password:' }).fill(s.password);
 
-  const dialogPromise = page.waitForEvent('dialog');
+  const dialog = page.waitForEvent('dialog');
   await page.getByRole('button', { name: 'Sign up' }).click();
-  const dialog = await dialogPromise;
-  console.log('Sign up dialog:', dialog.message());
-  await dialog.accept();
+  (await dialog).accept();
 });
 
-When('I log in with that user', async function () {
-  const { page, username, password } = this;
-
+When('I log in with that user', async ({ page }) => {
+  const { username, password } = state.get(page) || {};
   await page.getByRole('link', { name: 'Log in' }).click();
   await page.locator('#loginusername').fill(username);
   await page.locator('#loginpassword').fill(password);
   await page.getByRole('button', { name: 'Log in' }).click();
 });
 
-Then('I should see the welcome message with that username', async function () {
-  await expect(this.page.locator('#nameofuser')).toHaveText(`Welcome ${this.username}`);
+Then('I should see the welcome message with that username', async ({ page }) => {
+  const { username } = state.get(page) || {};
+  await expect(page.locator('#nameofuser')).toHaveText(`Welcome ${username}`);
 });

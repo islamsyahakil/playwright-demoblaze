@@ -1,22 +1,20 @@
 {
-  "name": "my-playwright",
+  "name": "my-playwright-bdd",
   "version": "1.0.0",
-  "main": "index.js",
+  "private": true,
+  "type": "commonjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "bdd": "cucumber-js -r features/support/world.cjs -r features/support/hooks.cjs -r features/steps/**/*.js -f progress -f junit:results/cucumber.xml features"
+    "pw:install": "playwright install --with-deps",
+    "bddgen": "bddgen",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "devDependencies": {
-    "@cucumber/cucumber": "^12.2.0",
-    "@playwright/test": "^1.55.0",
-    "dotenv": "^17.2.2",
-    "playwright": "^1.55.0"
-  },
-  "dependencies": {
-    "20": "^3.1.9"
+    "@cucumber/cucumber": "^10.0.0",
+    "@playwright/test": "^1.47.0",
+    "dotenv": "^16.4.5",
+    "playwright": "^1.47.0",
+    "playwright-bdd": "^8.0.0"
   }
 }

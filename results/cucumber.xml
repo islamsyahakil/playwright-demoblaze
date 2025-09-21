@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<testsuite name="Cucumber" time="7.787" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-09-06T18:14:16.204Z">
-  <testcase classname="Sign-Up and Login" name="Sign-Up and Login for the First time" time="7.424">
+<testsuite name="Cucumber" time="6.871" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-09-21T10:48:06.191Z">
+  <testcase classname="Sign-Up and Login" name="Sign-Up and Login for the First time" time="5.718">
     <system-out><![CDATA[Given I open the homepage...................................................passed
 When I sign up a new user...................................................passed
 And I log in with that user.................................................passed

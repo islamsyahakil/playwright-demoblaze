@@ -1,5 +1,25 @@
+# Node & OS
 node_modules/
-test-results/
-playwright-report/
-*.log
+npm-debug.log*
+package-lock.json
+
+# Env / secrets
 .env
+.env.*.local
+!.env.example
+
+# Playwright outputs
+playwright-report/
+test-results/
+results/
+tests-bdd-gen/
+
+# Traces & videos (kalau tersisa di luar default)
+*.trace.zip
+*.webm
+*.mp4
+
+# Editor/OS junk
+.DS_Store
+Thumbs.db
+.vscode/
