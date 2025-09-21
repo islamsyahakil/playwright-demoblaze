@@ -1,10 +1,8 @@
 name: Playwright (BDD)
 
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+  push: { branches: [ main, master ] }
+  pull_request: { branches: [ main, master ] }
 
 concurrency:
   group: playwright-${{ github.ref }}
@@ -15,21 +13,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
-    # >>> PENTING: semua perintah `run:` dieksekusi di folder my-playwright
+    # semua 'run:' dikerjakan dari my-playwright
     defaults:
       run:
         working-directory: my-playwright
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      # Cek lockfile benar-benar ada (diagnostik)
+      - name: Show files
+        run: ls -la && ls -la
+
+      - uses: actions/setup-node@v4
         with:
           node-version: lts/*
           cache: npm
-          cache-dependency-path: my-playwright/package-lock.json
+          cache-dependency-path: |
+            my-playwright/package-lock.json
 
       - name: Install deps
         run: npm ci
@@ -40,17 +41,11 @@ jobs:
       - name: Generate BDD tests
         run: npm run bddgen
 
-      # (opsional, bantu diagnosa "No tests found")
-      - name: List discovered tests
-        run: npx playwright test --list
-
-      - name: Run Playwright tests
+      - name: Run tests
         env:
-          BASE_URL: https://demoblaze.com   # ganti bila perlu
+          BASE_URL: https://demoblaze.com
         run: npm test
 
-      # Paths untuk upload-artifact selalu relatif ke root repo,
-      # jadi gunakan prefix "my-playwright/..."
       - name: Upload Playwright HTML report
         if: always()
         uses: actions/upload-artifact@v4
